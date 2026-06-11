@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:5000/api';
+  static const String baseUrl = 'https://80205fdb31e59a.lhr.life/api';
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -34,6 +34,7 @@ class ApiService {
         Uri.parse('$baseUrl/auth/signup'),
         headers: {
           'Content-Type': 'application/json',
+          'Bypass-Tunnel-Reminder': 'true',
         },
         body: jsonEncode({'email': email, 'password': password}),
       );
@@ -44,7 +45,10 @@ class ApiService {
         await _cacheUserData(data['user']);
         return true;
       }
-    } catch (_) {}
+      print('Signup failed status: ${res.statusCode}, body: ${res.body}');
+    } catch (e) {
+      print('Signup exception: $e');
+    }
     return false;
   }
 
@@ -54,6 +58,7 @@ class ApiService {
         Uri.parse('$baseUrl/auth/login'),
         headers: {
           'Content-Type': 'application/json',
+          'Bypass-Tunnel-Reminder': 'true',
         },
         body: jsonEncode({'email': email, 'password': password}),
       );
@@ -64,7 +69,34 @@ class ApiService {
         await _cacheUserData(data['user']);
         return true;
       }
-    } catch (_) {}
+      print('Login failed status: ${res.statusCode}, body: ${res.body}');
+    } catch (e) {
+      print('Login exception: $e');
+    }
+    return false;
+  }
+
+  static Future<bool> googleLogin(String idToken) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/auth/google'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Bypass-Tunnel-Reminder': 'true',
+        },
+        body: jsonEncode({'idToken': idToken}),
+      );
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        await saveToken(data['token']);
+        await _cacheUserData(data['user']);
+        return true;
+      }
+      print('Google login failed status: ${res.statusCode}, body: ${res.body}');
+    } catch (e) {
+      print('Google login exception: $e');
+    }
     return false;
   }
 
@@ -97,6 +129,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Bypass-Tunnel-Reminder': 'true',
         },
       ).timeout(const Duration(seconds: 5));
 
@@ -105,7 +138,10 @@ class ApiService {
         await _cacheUserData(data);
         return true;
       }
-    } catch (_) {}
+      print('Sync failed status: ${res.statusCode}, body: ${res.body}');
+    } catch (e) {
+      print('Sync exception: $e');
+    }
     return false;
   }
 
@@ -136,6 +172,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Bypass-Tunnel-Reminder': 'true',
         },
         body: jsonEncode({
           'name': name,
@@ -166,6 +203,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Bypass-Tunnel-Reminder': 'true',
         },
         body: jsonEncode({'contacts': contacts}),
       );

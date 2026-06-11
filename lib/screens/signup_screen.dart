@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'home_screen.dart';
@@ -48,6 +49,41 @@ class _SignupScreenState extends State<SignupScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Signup failed. User may already exist or network error.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _loading = true);
+    try {
+      final googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+      final account = await googleSignIn.signIn();
+      if (account != null) {
+        final auth = await account.authentication;
+        final idToken = auth.idToken;
+        if (idToken != null) {
+          final success = await ApiService.googleLogin(idToken);
+          if (success && mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      print('Google sign in error: $e');
+    }
+    setState(() => _loading = false);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Google Sign-In failed or cancelled.'),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -243,26 +279,52 @@ class _SignupScreenState extends State<SignupScreen> {
                         ? const Center(
                             child: CircularProgressIndicator(color: Colors.pinkAccent),
                           )
-                        : ElevatedButton(
-                            onPressed: _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.pinkAccent,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ElevatedButton(
+                                onPressed: _submit,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.pinkAccent,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  elevation: 8,
+                                  shadowColor: Colors.pinkAccent.withOpacity(0.4),
+                                ),
+                                child: const Text(
+                                  'SIGN UP',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
                               ),
-                              elevation: 8,
-                              shadowColor: Colors.pinkAccent.withOpacity(0.4),
-                            ),
-                            child: const Text(
-                              'SIGN UP',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 1.2,
+                              const SizedBox(height: 16),
+                              OutlinedButton.icon(
+                                onPressed: _handleGoogleSignIn,
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  side: BorderSide(color: Colors.white.withOpacity(0.2)),
+                                ),
+                                icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
+                                label: const Text(
+                                  'SIGN UP WITH GOOGLE',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                     const SizedBox(height: 24),
                     Row(
