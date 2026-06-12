@@ -79,6 +79,31 @@ class ApiService {
     return false;
   }
 
+  static Future<bool> googleLogin(String idToken) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/auth/google'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Bypass-Tunnel-Reminder': 'true',
+            },
+            body: jsonEncode({'idToken': idToken}),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        await saveToken(data['token']);
+        await _cacheUserData(data['user']);
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
   static Future<void> _cacheUserData(Map<String, dynamic> user) async {
     final prefs = await SharedPreferences.getInstance();
 
