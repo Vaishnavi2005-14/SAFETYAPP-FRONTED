@@ -59,19 +59,7 @@ Before running the app, update the `baseUrl` inside `lib/services/api_service.da
 static const String baseUrl = 'https://your-backend.up.railway.app/api';
 ```
 
-### 2. Google Sign-In Configuration
-To enable Google Sign-In on Android/iOS/Web:
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a project and set up the **OAuth Consent Screen**.
-3. Create an **OAuth 2.0 Client ID** (Web application, Android, or iOS client ID depending on target platform).
-4. If testing on Android, generate your keystore SHA-1 fingerprint:
-   ```bash
-   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
-   ```
-   Add this SHA-1 fingerprint to your Android App settings in the Firebase Console or Google Developer Console.
-5. In Flutter, the SDK will automatically initialize using the local settings. For Web, pass your Client ID to the GoogleSignIn initialization if needed.
-
-### 3. Execution
+### 2. Execution
 Run the following commands to install dependencies and run the application:
 ```bash
 flutter pub get
