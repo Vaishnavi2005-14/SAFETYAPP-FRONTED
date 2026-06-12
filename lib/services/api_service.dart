@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:5000/api';
+  static const String baseUrl =
+      'https://safetyapp-backend-production.up.railway.app/api';
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -30,14 +31,16 @@ class ApiService {
 
   static Future<bool> signup(String email, String password) async {
     try {
-      final res = await http.post(
-        Uri.parse('$baseUrl/auth/signup'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Bypass-Tunnel-Reminder': 'true',
-        },
-        body: jsonEncode({'email': email, 'password': password}),
-      );
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/auth/signup'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Bypass-Tunnel-Reminder': 'true',
+            },
+            body: jsonEncode({'email': email, 'password': password}),
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (res.statusCode == 201) {
         final data = jsonDecode(res.body);
@@ -45,23 +48,24 @@ class ApiService {
         await _cacheUserData(data['user']);
         return true;
       }
-      print('Signup failed status: ${res.statusCode}, body: ${res.body}');
     } catch (e) {
-      print('Signup exception: $e');
+      return false;
     }
     return false;
   }
 
   static Future<bool> login(String email, String password) async {
     try {
-      final res = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Bypass-Tunnel-Reminder': 'true',
-        },
-        body: jsonEncode({'email': email, 'password': password}),
-      );
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/auth/login'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Bypass-Tunnel-Reminder': 'true',
+            },
+            body: jsonEncode({'email': email, 'password': password}),
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
@@ -69,23 +73,24 @@ class ApiService {
         await _cacheUserData(data['user']);
         return true;
       }
-      print('Login failed status: ${res.statusCode}, body: ${res.body}');
     } catch (e) {
-      print('Login exception: $e');
+      return false;
     }
     return false;
   }
 
   static Future<bool> googleLogin(String idToken) async {
     try {
-      final res = await http.post(
-        Uri.parse('$baseUrl/auth/google'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Bypass-Tunnel-Reminder': 'true',
-        },
-        body: jsonEncode({'idToken': idToken}),
-      );
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/auth/google'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Bypass-Tunnel-Reminder': 'true',
+            },
+            body: jsonEncode({'idToken': idToken}),
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
@@ -93,16 +98,15 @@ class ApiService {
         await _cacheUserData(data['user']);
         return true;
       }
-      print('Google login failed status: ${res.statusCode}, body: ${res.body}');
     } catch (e) {
-      print('Google login exception: $e');
+      return false;
     }
     return false;
   }
 
   static Future<void> _cacheUserData(Map<String, dynamic> user) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     if (user['contacts'] != null) {
       await prefs.setString('contacts', jsonEncode(user['contacts']));
     }
@@ -115,7 +119,8 @@ class ApiService {
       await prefs.setString('profile_aadhaar', p['aadhaar'] ?? '');
       await prefs.setString('profile_custom_message', p['customMessage'] ?? '');
       await prefs.setBool('profile_shake_enabled', p['shakeEnabled'] ?? true);
-      await prefs.setString('profile_shake_sensitivity', p['shakeSensitivity'] ?? 'Medium');
+      await prefs.setString(
+          'profile_shake_sensitivity', p['shakeSensitivity'] ?? 'Medium');
     }
   }
 
@@ -138,9 +143,8 @@ class ApiService {
         await _cacheUserData(data);
         return true;
       }
-      print('Sync failed status: ${res.statusCode}, body: ${res.body}');
     } catch (e) {
-      print('Sync exception: $e');
+      return false;
     }
     return false;
   }

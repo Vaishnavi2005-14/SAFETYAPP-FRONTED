@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'home_screen.dart';
@@ -48,42 +47,8 @@ class _SignupScreenState extends State<SignupScreen> {
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Signup failed. User may already exist or network error.'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-    }
-  }
-
-  Future<void> _handleGoogleSignIn() async {
-    setState(() => _loading = true);
-    try {
-      final googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-      );
-      final account = await googleSignIn.signIn();
-      if (account != null) {
-        final auth = await account.authentication;
-        final idToken = auth.idToken;
-        if (idToken != null) {
-          final success = await ApiService.googleLogin(idToken);
-          if (success && mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-            );
-            return;
-          }
-        }
-      }
-    } catch (e) {
-      print('Google sign in error: $e');
-    }
-    setState(() => _loading = false);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Google Sign-In failed or cancelled.'),
+          content:
+              Text('Signup failed. User may already exist or network error.'),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -166,27 +131,32 @@ class _SignupScreenState extends State<SignupScreen> {
                       decoration: InputDecoration(
                         labelText: 'Email Address',
                         labelStyle: const TextStyle(color: Colors.white60),
-                        prefixIcon: const Icon(Icons.email_outlined, color: Colors.white60),
+                        prefixIcon: const Icon(Icons.email_outlined,
+                            color: Colors.white60),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.04),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.05)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.05)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Colors.pinkAccent),
+                          borderSide:
+                              const BorderSide(color: Colors.pinkAccent),
                         ),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter your email';
                         }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value.trim())) {
                           return 'Please enter a valid email address';
                         }
                         return null;
@@ -200,27 +170,34 @@ class _SignupScreenState extends State<SignupScreen> {
                       decoration: InputDecoration(
                         labelText: 'Password',
                         labelStyle: const TextStyle(color: Colors.white60),
-                        prefixIcon: const Icon(Icons.lock_outline, color: Colors.white60),
+                        prefixIcon: const Icon(Icons.lock_outline,
+                            color: Colors.white60),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                            _obscureText
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
                             color: Colors.white60,
                           ),
-                          onPressed: () => setState(() => _obscureText = !_obscureText),
+                          onPressed: () =>
+                              setState(() => _obscureText = !_obscureText),
                         ),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.04),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.05)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.05)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Colors.pinkAccent),
+                          borderSide:
+                              const BorderSide(color: Colors.pinkAccent),
                         ),
                       ),
                       validator: (value) {
@@ -241,27 +218,34 @@ class _SignupScreenState extends State<SignupScreen> {
                       decoration: InputDecoration(
                         labelText: 'Confirm Password',
                         labelStyle: const TextStyle(color: Colors.white60),
-                        prefixIcon: const Icon(Icons.lock_outline, color: Colors.white60),
+                        prefixIcon: const Icon(Icons.lock_outline,
+                            color: Colors.white60),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscureConfirmText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                            _obscureConfirmText
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
                             color: Colors.white60,
                           ),
-                          onPressed: () => setState(() => _obscureConfirmText = !_obscureConfirmText),
+                          onPressed: () => setState(
+                              () => _obscureConfirmText = !_obscureConfirmText),
                         ),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.04),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.05)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.05)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Colors.pinkAccent),
+                          borderSide:
+                              const BorderSide(color: Colors.pinkAccent),
                         ),
                       ),
                       validator: (value) {
@@ -277,54 +261,29 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SizedBox(height: 28),
                     _loading
                         ? const Center(
-                            child: CircularProgressIndicator(color: Colors.pinkAccent),
+                            child: CircularProgressIndicator(
+                                color: Colors.pinkAccent),
                           )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              ElevatedButton(
-                                onPressed: _submit,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.pinkAccent,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  elevation: 8,
-                                  shadowColor: Colors.pinkAccent.withOpacity(0.4),
-                                ),
-                                child: const Text(
-                                  'SIGN UP',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
+                        : ElevatedButton(
+                            onPressed: _submit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.pinkAccent,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
                               ),
-                              const SizedBox(height: 16),
-                              OutlinedButton.icon(
-                                onPressed: _handleGoogleSignIn,
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  side: BorderSide(color: Colors.white.withOpacity(0.2)),
-                                ),
-                                icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
-                                label: const Text(
-                                  'SIGN UP WITH GOOGLE',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
+                              elevation: 8,
+                              shadowColor: Colors.pinkAccent.withOpacity(0.4),
+                            ),
+                            child: const Text(
+                              'SIGN UP',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1.2,
                               ),
-                            ],
+                            ),
                           ),
                     const SizedBox(height: 24),
                     Row(
@@ -338,7 +297,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                              MaterialPageRoute(
+                                  builder: (_) => const LoginScreen()),
                             );
                           },
                           child: const Text(
