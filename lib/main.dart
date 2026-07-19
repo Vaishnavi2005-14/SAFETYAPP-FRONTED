@@ -10,9 +10,7 @@ import 'screens/signup_screen.dart';
 import 'screens/forgot_password_screen.dart';
 import 'services/api_service.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await ApiService.init();
+void main() {
   runApp(const SafeHerApp());
 }
 

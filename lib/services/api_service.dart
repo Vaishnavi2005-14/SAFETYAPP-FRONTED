@@ -3,26 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static String baseUrl = 'https://safetyapp-backend-production.up.railway.app/api';
-
-  static Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
-    baseUrl = prefs.getString('custom_server_url') ?? 'https://safetyapp-backend-production.up.railway.app/api';
-  }
-
-  static Future<void> updateBaseUrl(String newUrl) async {
-    String formattedUrl = newUrl.trim();
-    if (!formattedUrl.endsWith('/api') && !formattedUrl.endsWith('/api/')) {
-      if (formattedUrl.endsWith('/')) {
-        formattedUrl = '${formattedUrl}api';
-      } else {
-        formattedUrl = '$formattedUrl/api';
-      }
-    }
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('custom_server_url', formattedUrl);
-    baseUrl = formattedUrl;
-  }
+  static const String baseUrl = 'https://safetyapp-backend-production.up.railway.app/api';
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
