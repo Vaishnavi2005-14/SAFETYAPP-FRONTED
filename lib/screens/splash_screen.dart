@@ -100,8 +100,7 @@ class _SplashScreenState extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AnimatedBuilder(
-                  animation:
-                      Listenable.merge([_pulseController, _rotationController]),
+                  animation: _pulseController,
                   builder: (context, child) {
                     final double pulse = _pulseController.value;
                     return Container(
