@@ -7,8 +7,12 @@ import 'screens/profile_screen.dart';
 import 'screens/fake_call_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
+import 'screens/forgot_password_screen.dart';
+import 'services/api_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await ApiService.init();
   runApp(const SafeHerApp());
 }
 
@@ -49,6 +53,7 @@ class SafeHerApp extends StatelessWidget {
         '/fake_call': (context) => const FakeCallScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
+        '/forgot_password': (context) => const ForgotPasswordScreen(),
       },
     );
   }

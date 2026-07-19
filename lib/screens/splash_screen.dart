@@ -11,7 +11,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _rotationController;
   late AnimationController _pulseController;
   late AnimationController _textGlowController;
   late List<_Particle> _particles;
@@ -19,9 +18,6 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    _rotationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 8))
-          ..repeat();
 
     _pulseController =
         AnimationController(vsync: this, duration: const Duration(seconds: 2))
@@ -57,7 +53,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _rotationController.dispose();
     _pulseController.dispose();
     _textGlowController.dispose();
     super.dispose();
@@ -121,26 +116,23 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                         ],
                       ),
-                      child: Transform.rotate(
-                        angle: _rotationController.value * 2 * pi,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [Colors.pinkAccent, Colors.purpleAccent, Colors.cyanAccent],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [Colors.pinkAccent, Colors.purpleAccent, Colors.cyanAccent],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(100),
-                            child: Image.asset(
-                              'assets/logo.jpg',
-                              height: 140,
-                              width: 140,
-                              fit: BoxFit.cover,
-                            ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Image.asset(
+                            'assets/logo.jpg',
+                            height: 140,
+                            width: 140,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       ),

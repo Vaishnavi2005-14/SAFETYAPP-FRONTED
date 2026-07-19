@@ -1,9 +1,30 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:5000/api';
+  static String baseUrl = 'http://10.6.180.212:5000/api';
+
+  static Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    baseUrl = prefs.getString('custom_server_url') ?? 'http://10.6.180.212:5000/api';
+  }
+
+  static Future<void> updateBaseUrl(String newUrl) async {
+    String formattedUrl = newUrl.trim();
+    if (!formattedUrl.endsWith('/api') && !formattedUrl.endsWith('/api/')) {
+      if (formattedUrl.endsWith('/')) {
+        formattedUrl = '${formattedUrl}api';
+      } else {
+        formattedUrl = '$formattedUrl/api';
+      }
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('custom_server_url', formattedUrl);
+    baseUrl = formattedUrl;
+  }
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -44,7 +65,10 @@ class ApiService {
         await _cacheUserData(data['user']);
         return true;
       }
-    } catch (_) {}
+      print('Signup failed status: ${res.statusCode}, body: ${res.body}');
+    } catch (e) {
+      print('Signup exception: $e');
+    }
     return false;
   }
 
@@ -64,7 +88,30 @@ class ApiService {
         await _cacheUserData(data['user']);
         return true;
       }
-    } catch (_) {}
+      print('Login failed status: ${res.statusCode}, body: ${res.body}');
+    } catch (e) {
+      print('Login exception: $e');
+    }
+    return false;
+  }
+
+  static Future<bool> forgotPassword(String email, String newPassword) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/auth/forgot-password'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'email': email, 'newPassword': newPassword}),
+      );
+
+      if (res.statusCode == 200) {
+        return true;
+      }
+      print('Forgot password failed status: ${res.statusCode}, body: ${res.body}');
+    } catch (e) {
+      print('Forgot password exception: $e');
+    }
     return false;
   }
 
@@ -105,7 +152,10 @@ class ApiService {
         await _cacheUserData(data);
         return true;
       }
-    } catch (_) {}
+      print('Sync failed status: ${res.statusCode}, body: ${res.body}');
+    } catch (e) {
+      print('Sync exception: $e');
+    }
     return false;
   }
 

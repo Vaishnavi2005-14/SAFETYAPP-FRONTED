@@ -1,112 +1,28 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import 'login_screen.dart';
-import 'home_screen.dart';
 
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
+  final _newPassCtrl = TextEditingController();
   final _confirmPassCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
-  bool _obscureText = true;
-  bool _obscureConfirmText = true;
+  bool _obscureNewPass = true;
+  bool _obscureConfirmPass = true;
 
   @override
   void dispose() {
     _emailCtrl.dispose();
-    _passCtrl.dispose();
+    _newPassCtrl.dispose();
     _confirmPassCtrl.dispose();
     super.dispose();
-  }
-
-  void _showServerSettingsDialog(BuildContext context) {
-    final controller = TextEditingController(text: ApiService.baseUrl);
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF151233),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
-            children: [
-              Icon(Icons.dns_outlined, color: Colors.pinkAccent),
-              SizedBox(width: 10),
-              Text(
-                'Server Settings',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Enter the backend API server URL:',
-                style: TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'API Server URL',
-                  labelStyle: const TextStyle(color: Colors.white60),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.04),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.pinkAccent),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'e.g. http://10.6.180.212:5000/api or tunnel URL',
-                style: TextStyle(color: Colors.white38, fontSize: 11),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('CANCEL', style: TextStyle(color: Colors.white60)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.pinkAccent),
-              onPressed: () async {
-                final newUrl = controller.text.trim();
-                if (newUrl.isNotEmpty) {
-                  await ApiService.updateBaseUrl(newUrl);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Server URL updated successfully!'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                    Navigator.pop(context);
-                  }
-                }
-              },
-              child: const Text('SAVE', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Future<void> _submit() async {
@@ -114,22 +30,25 @@ class _SignupScreenState extends State<SignupScreen> {
 
     setState(() => _loading = true);
 
-    final success = await ApiService.signup(
+    final success = await ApiService.forgotPassword(
       _emailCtrl.text.trim(),
-      _passCtrl.text.trim(),
+      _newPassCtrl.text.trim(),
     );
 
     setState(() => _loading = false);
 
     if (success && mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password reset successful! Please login with your new password.'),
+          backgroundColor: Colors.green,
+        ),
       );
+      Navigator.pop(context); // Go back to Login Screen
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Signup failed. User may already exist or network error.'),
+          content: Text('Password reset failed. Please ensure the email is registered.'),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -140,14 +59,9 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Reset Password'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Colors.white70),
-            onPressed: () => _showServerSettingsDialog(context),
-          ),
-        ],
       ),
       extendBodyBehindAppBar: true,
       body: Container(
@@ -168,38 +82,17 @@ class _SignupScreenState extends State<SignupScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.pinkAccent.withOpacity(0.3),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.transparent,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(50),
-                          child: Image.asset(
-                            'assets/logo.jpg',
-                            fit: BoxFit.cover,
-                            height: 100,
-                            width: 100,
-                          ),
-                        ),
-                      ),
+                    const Icon(
+                      Icons.lock_reset_rounded,
+                      size: 80,
+                      color: Colors.pinkAccent,
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'CREATE SHIELD',
+                      'FORGOT PASSWORD',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 24,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 2,
                         color: Colors.white,
@@ -207,7 +100,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Register to store your safety contacts online',
+                      'Enter your registered email and a new password to reset it',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
@@ -215,7 +108,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 40),
                     TextFormField(
                       controller: _emailCtrl,
                       keyboardType: TextInputType.emailAddress,
@@ -251,19 +144,19 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: _passCtrl,
-                      obscureText: _obscureText,
+                      controller: _newPassCtrl,
+                      obscureText: _obscureNewPass,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: 'New Password',
                         labelStyle: const TextStyle(color: Colors.white60),
                         prefixIcon: const Icon(Icons.lock_outline, color: Colors.white60),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                            _obscureNewPass ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                             color: Colors.white60,
                           ),
-                          onPressed: () => setState(() => _obscureText = !_obscureText),
+                          onPressed: () => setState(() => _obscureNewPass = !_obscureNewPass),
                         ),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.04),
@@ -282,7 +175,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a password';
+                          return 'Please enter a new password';
                         }
                         if (value.length < 6) {
                           return 'Password must be at least 6 characters';
@@ -293,18 +186,18 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _confirmPassCtrl,
-                      obscureText: _obscureConfirmText,
+                      obscureText: _obscureConfirmPass,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        labelText: 'Confirm Password',
+                        labelText: 'Confirm New Password',
                         labelStyle: const TextStyle(color: Colors.white60),
                         prefixIcon: const Icon(Icons.lock_outline, color: Colors.white60),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscureConfirmText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                            _obscureConfirmPass ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                             color: Colors.white60,
                           ),
-                          onPressed: () => setState(() => _obscureConfirmText = !_obscureConfirmText),
+                          onPressed: () => setState(() => _obscureConfirmPass = !_obscureConfirmPass),
                         ),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.04),
@@ -323,9 +216,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please confirm your password';
+                          return 'Please confirm your new password';
                         }
-                        if (value != _passCtrl.text) {
+                        if (value != _newPassCtrl.text) {
                           return 'Passwords do not match';
                         }
                         return null;
@@ -348,7 +241,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               shadowColor: Colors.pinkAccent.withOpacity(0.4),
                             ),
                             child: const Text(
-                              'SIGN UP',
+                              'RESET PASSWORD',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -358,31 +251,6 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                           ),
                     const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Already have an account? ",
-                          style: TextStyle(color: Colors.white60, fontSize: 13),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => const LoginScreen()),
-                            );
-                          },
-                          child: const Text(
-                            'Log In',
-                            style: TextStyle(
-                              color: Colors.pinkAccent,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),

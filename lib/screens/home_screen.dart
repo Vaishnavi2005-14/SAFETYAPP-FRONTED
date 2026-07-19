@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +11,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'contacts_screen.dart';
 import 'profile_screen.dart';
@@ -237,7 +239,34 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
 
   Future<void> _playAlertSound() async {
     try {
-      await _player.play(AssetSource('alert.mp3'));
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/alert.mp3');
+      if (!await tempFile.exists()) {
+        final byteData = await rootBundle.load('assets/alert.mp3');
+        await tempFile.writeAsBytes(byteData.buffer.asUint8List(
+          byteData.offsetInBytes,
+          byteData.lengthInBytes,
+        ));
+      }
+
+      await _player.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: true,
+            stayAwake: true,
+            contentType: AndroidContentType.music,
+            usageType: AndroidUsageType.alarm,
+          ),
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playback,
+            options: const {
+              AVAudioSessionOptions.defaultToSpeaker,
+            },
+          ),
+        ),
+      );
+      await _player.setVolume(1.0);
+      await _player.play(DeviceFileSource(tempFile.path));
     } catch (_) {}
   }
 
