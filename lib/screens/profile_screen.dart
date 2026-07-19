@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 
@@ -45,18 +46,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: Colors.white12),
         ),
-        title: const Text('Log Out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: const Text('Are you sure you want to log out?', style: TextStyle(color: Colors.white70)),
+        title: const Text('Log Out',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: const Text('Are you sure you want to log out?',
+            style: TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
+            child:
+                const Text('Cancel', style: TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
             onPressed: () async {
               await ApiService.clearSession();
               if (mounted) {
-                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/login', (route) => false);
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
@@ -74,9 +79,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _age.text = prefs.getString('profile_age') ?? '';
       _phone.text = prefs.getString('profile_phone') ?? '';
       _aadhaar.text = prefs.getString('profile_aadhaar') ?? '';
-      _customMessage.text = prefs.getString('profile_custom_message') ?? '🚨 Emergency! I need help immediately. My location:';
+      _customMessage.text = prefs.getString('profile_custom_message') ??
+          '🚨 Emergency! I need help immediately. My location:';
       _shakeEnabled = prefs.getBool('profile_shake_enabled') ?? true;
-      _shakeSensitivity = prefs.getString('profile_shake_sensitivity') ?? 'Medium';
+      _shakeSensitivity =
+          prefs.getString('profile_shake_sensitivity') ?? 'Medium';
 
       final s = prefs.getString('contacts');
       if (s != null) {
@@ -100,7 +107,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _aadhaar.text = prefs.getString('profile_aadhaar') ?? '';
         _customMessage.text = prefs.getString('profile_custom_message') ?? '';
         _shakeEnabled = prefs.getBool('profile_shake_enabled') ?? true;
-        _shakeSensitivity = prefs.getString('profile_shake_sensitivity') ?? 'Medium';
+        _shakeSensitivity =
+            prefs.getString('profile_shake_sensitivity') ?? 'Medium';
 
         final s = prefs.getString('contacts');
         if (s != null) {
@@ -122,10 +130,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final aadhaar = _aadhaar.text.trim();
     final customMsg = _customMessage.text.trim();
 
-    if (name.isEmpty || age.isEmpty || phone.isEmpty || aadhaar.isEmpty || customMsg.isEmpty) {
+    if (name.isEmpty ||
+        age.isEmpty ||
+        phone.isEmpty ||
+        aadhaar.isEmpty ||
+        customMsg.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill all profile fields and SOS message!'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(name)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Name can only contain letters and spaces'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    final ageInt = int.tryParse(age);
+    if (ageInt == null || ageInt < 1 || ageInt > 120) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Age must be between 1 and 120'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    if (phone.length != 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Phone number must be exactly 10 digits'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    if (aadhaar.length != 12) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Aadhaar number must be exactly 12 digits'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    if (customMsg.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('SOS message too short (minimum 10 characters)'),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -146,8 +209,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(success 
-            ? 'Profile and settings updated successfully!' 
+        content: Text(success
+            ? 'Profile and settings updated successfully!'
             : 'Saved locally. Sync with server failed.'),
         backgroundColor: success ? Colors.green : Colors.orangeAccent,
       ),
@@ -159,6 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -167,10 +231,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         enabled: _editing,
         keyboardType: keyboardType,
         maxLines: maxLines,
+        inputFormatters: inputFormatters,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(color: Colors.white60, fontWeight: FontWeight.w500),
+          labelStyle: const TextStyle(
+              color: Colors.white60, fontWeight: FontWeight.w500),
           filled: true,
           fillColor: Colors.white.withOpacity(0.04),
           disabledBorder: OutlineInputBorder(
@@ -197,14 +263,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: const Text(
           'PROFILE & SETTINGS',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 18),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 18),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
         actions: [
           IconButton(
-            icon: Icon(_editing ? Icons.check_circle : Icons.edit, color: Colors.pinkAccent, size: 28),
+            icon: Icon(_editing ? Icons.check_circle : Icons.edit,
+                color: Colors.pinkAccent, size: 28),
             onPressed: () {
               if (_editing) {
                 _saveProfile();
@@ -222,7 +290,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 12.0, bottom: 100.0),
+          padding: const EdgeInsets.only(
+              left: 24.0, right: 24.0, top: 12.0, bottom: 100.0),
           child: Column(
             children: [
               Center(
@@ -249,18 +318,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildStatCard("Shield Status", "ACTIVE", Colors.greenAccent),
-                  _buildStatCard("Guardians", "$_guardianCount Saving", Colors.cyanAccent),
+                  _buildStatCard(
+                      "Guardians", "$_guardianCount Saving", Colors.cyanAccent),
                 ],
               ),
               const SizedBox(height: 20),
-
               _buildSectionHeader("PERSONAL PROFILE"),
-              _buildTextField(label: 'Full Name', controller: _name),
+              _buildTextField(
+                label: 'Full Name',
+                controller: _name,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                ],
+              ),
               Row(
                 children: [
                   Expanded(
@@ -268,6 +342,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       label: 'Age',
                       controller: _age,
                       keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(3),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -276,6 +354,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       label: 'Phone',
                       controller: _phone,
                       keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
                     ),
                   ),
                 ],
@@ -284,21 +366,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 label: 'Aadhaar Card Number',
                 controller: _aadhaar,
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(12),
+                ],
               ),
-
               const SizedBox(height: 24),
-
               _buildSectionHeader("EMERGENCY CONFIGURATION"),
               _buildTextField(
                 label: 'Custom SOS Message Prefix',
                 controller: _customMessage,
                 maxLines: 2,
               ),
-
               const SizedBox(height: 12),
-
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.04),
                   borderRadius: BorderRadius.circular(16),
@@ -314,12 +397,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: const [
                             Text(
                               "Shake to SOS Trigger",
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15),
                             ),
                             SizedBox(height: 2),
                             Text(
                               "Trigger emergency warning on shake",
-                              style: TextStyle(color: Colors.white38, fontSize: 11),
+                              style: TextStyle(
+                                  color: Colors.white38, fontSize: 11),
                             ),
                           ],
                         ),
@@ -343,15 +430,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           const Text(
                             "Shake Sensitivity",
-                            style: TextStyle(color: Colors.white70, fontSize: 14),
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 14),
                           ),
                           _editing
                               ? DropdownButton<String>(
                                   dropdownColor: const Color(0xFF151233),
                                   value: _shakeSensitivity,
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
                                   underline: Container(),
-                                  items: ['Low', 'Medium', 'High'].map((String val) {
+                                  items: ['Low', 'Medium', 'High']
+                                      .map((String val) {
                                     return DropdownMenuItem<String>(
                                       value: val,
                                       child: Text(val),
@@ -367,7 +458,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 )
                               : Text(
                                   _shakeSensitivity,
-                                  style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      color: Colors.cyanAccent,
+                                      fontWeight: FontWeight.bold),
                                 ),
                         ],
                       ),
@@ -375,7 +468,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 32),
               Text(
                 'Stay safe, stay empowered 💖',
@@ -407,12 +499,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Text(
               label,
-              style: const TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                  color: Colors.white38,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 6),
             Text(
               value,
-              style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+              style: TextStyle(
+                  color: color,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.8),
             ),
           ],
         ),

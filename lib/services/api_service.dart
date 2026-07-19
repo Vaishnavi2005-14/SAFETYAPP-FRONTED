@@ -1,15 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static String baseUrl = 'http://10.6.180.212:5000/api';
+  static String baseUrl = 'https://safetyapp-backend-production.up.railway.app/api';
 
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    baseUrl = prefs.getString('custom_server_url') ?? 'http://10.6.180.212:5000/api';
+    baseUrl = prefs.getString('custom_server_url') ?? 'https://safetyapp-backend-production.up.railway.app/api';
   }
 
   static Future<void> updateBaseUrl(String newUrl) async {
@@ -55,9 +53,10 @@ class ApiService {
         Uri.parse('$baseUrl/auth/signup'),
         headers: {
           'Content-Type': 'application/json',
+          'Bypass-Tunnel-Reminder': 'true',
         },
         body: jsonEncode({'email': email, 'password': password}),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (res.statusCode == 201) {
         final data = jsonDecode(res.body);
@@ -65,10 +64,7 @@ class ApiService {
         await _cacheUserData(data['user']);
         return true;
       }
-      print('Signup failed status: ${res.statusCode}, body: ${res.body}');
-    } catch (e) {
-      print('Signup exception: $e');
-    }
+    } catch (_) {}
     return false;
   }
 
@@ -78,9 +74,10 @@ class ApiService {
         Uri.parse('$baseUrl/auth/login'),
         headers: {
           'Content-Type': 'application/json',
+          'Bypass-Tunnel-Reminder': 'true',
         },
         body: jsonEncode({'email': email, 'password': password}),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
@@ -88,10 +85,7 @@ class ApiService {
         await _cacheUserData(data['user']);
         return true;
       }
-      print('Login failed status: ${res.statusCode}, body: ${res.body}');
-    } catch (e) {
-      print('Login exception: $e');
-    }
+    } catch (_) {}
     return false;
   }
 
@@ -101,23 +95,42 @@ class ApiService {
         Uri.parse('$baseUrl/auth/forgot-password'),
         headers: {
           'Content-Type': 'application/json',
+          'Bypass-Tunnel-Reminder': 'true',
         },
         body: jsonEncode({'email': email, 'newPassword': newPassword}),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (res.statusCode == 200) {
         return true;
       }
-      print('Forgot password failed status: ${res.statusCode}, body: ${res.body}');
-    } catch (e) {
-      print('Forgot password exception: $e');
-    }
+    } catch (_) {}
+    return false;
+  }
+
+  static Future<bool> googleLogin(String idToken) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/auth/google'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Bypass-Tunnel-Reminder': 'true',
+        },
+        body: jsonEncode({'idToken': idToken}),
+      ).timeout(const Duration(seconds: 10));
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        await saveToken(data['token']);
+        await _cacheUserData(data['user']);
+        return true;
+      }
+    } catch (_) {}
     return false;
   }
 
   static Future<void> _cacheUserData(Map<String, dynamic> user) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     if (user['contacts'] != null) {
       await prefs.setString('contacts', jsonEncode(user['contacts']));
     }
@@ -130,7 +143,8 @@ class ApiService {
       await prefs.setString('profile_aadhaar', p['aadhaar'] ?? '');
       await prefs.setString('profile_custom_message', p['customMessage'] ?? '');
       await prefs.setBool('profile_shake_enabled', p['shakeEnabled'] ?? true);
-      await prefs.setString('profile_shake_sensitivity', p['shakeSensitivity'] ?? 'Medium');
+      await prefs.setString(
+          'profile_shake_sensitivity', p['shakeSensitivity'] ?? 'Medium');
     }
   }
 
@@ -144,6 +158,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Bypass-Tunnel-Reminder': 'true',
         },
       ).timeout(const Duration(seconds: 5));
 
@@ -152,10 +167,7 @@ class ApiService {
         await _cacheUserData(data);
         return true;
       }
-      print('Sync failed status: ${res.statusCode}, body: ${res.body}');
-    } catch (e) {
-      print('Sync exception: $e');
-    }
+    } catch (_) {}
     return false;
   }
 
@@ -186,6 +198,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Bypass-Tunnel-Reminder': 'true',
         },
         body: jsonEncode({
           'name': name,
@@ -216,6 +229,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Bypass-Tunnel-Reminder': 'true',
         },
         body: jsonEncode({'contacts': contacts}),
       );

@@ -67,7 +67,11 @@ class _SplashScreenState extends State<SplashScreen>
             child: Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF070517), Color(0xFF0F0C2A), Color(0xFF19133F)],
+                  colors: [
+                    Color(0xFF070517),
+                    Color(0xFF0F0C2A),
+                    Color(0xFF19133F)
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -96,7 +100,8 @@ class _SplashScreenState extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AnimatedBuilder(
-                  animation: _pulseController,
+                  animation:
+                      Listenable.merge([_pulseController, _rotationController]),
                   builder: (context, child) {
                     final double pulse = _pulseController.value;
                     return Container(
@@ -110,7 +115,8 @@ class _SplashScreenState extends State<SplashScreen>
                             spreadRadius: 2 + (5 * pulse),
                           ),
                           BoxShadow(
-                            color: Colors.purpleAccent.withOpacity(0.3 * (1 - pulse)),
+                            color: Colors.purpleAccent
+                                .withOpacity(0.3 * (1 - pulse)),
                             blurRadius: 15 + (20 * (1 - pulse)),
                             spreadRadius: 1 + (3 * (1 - pulse)),
                           ),
@@ -174,7 +180,8 @@ class _SplashScreenState extends State<SplashScreen>
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2,
-                            color: Colors.white.withOpacity(0.6 + 0.3 * glowVal),
+                            color:
+                                Colors.white.withOpacity(0.6 + 0.3 * glowVal),
                           ),
                         ),
                       ],
@@ -187,7 +194,8 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 45,
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent.shade200),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.pinkAccent.shade200),
                     backgroundColor: Colors.white10,
                   ),
                 ),
@@ -236,4 +244,3 @@ class _ParticlePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ParticlePainter oldDelegate) => true;
 }
-

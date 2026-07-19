@@ -67,7 +67,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData outlineIcon, IconData solidIcon, String label) {
+  Widget _buildNavItem(
+      int index, IconData outlineIcon, IconData solidIcon, String label) {
     final isSelected = _selectedIndex == index;
     return GestureDetector(
       onTap: () {
@@ -87,10 +88,13 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  color: isSelected ? Colors.pinkAccent.withOpacity(0.15) : Colors.transparent,
+                  color: isSelected
+                      ? Colors.pinkAccent.withOpacity(0.15)
+                      : Colors.transparent,
                 ),
                 child: Icon(
                   isSelected ? solidIcon : outlineIcon,
@@ -153,7 +157,7 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
   final AudioPlayer _player = AudioPlayer();
   late AnimationController _radarController;
-  
+
   StreamSubscription? _shakeSubscription;
   bool _shakeEnabled = true;
   double _shakeThreshold = 25.0;
@@ -188,10 +192,13 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
-        final pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
+        final pos = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
         setState(() {
-          _gpsCoordinates = "LAT: ${pos.latitude.toStringAsFixed(5)}  •  LNG: ${pos.longitude.toStringAsFixed(5)}";
+          _gpsCoordinates =
+              "LAT: ${pos.latitude.toStringAsFixed(5)}  •  LNG: ${pos.longitude.toStringAsFixed(5)}";
           _gpsSignalActive = true;
         });
       } else {
@@ -211,8 +218,9 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
   Future<void> _initShakeDetector() async {
     final prefs = await SharedPreferences.getInstance();
     _shakeEnabled = prefs.getBool('profile_shake_enabled') ?? true;
-    final sensitivity = prefs.getString('profile_shake_sensitivity') ?? 'Medium';
-    
+    final sensitivity =
+        prefs.getString('profile_shake_sensitivity') ?? 'Medium';
+
     if (sensitivity == 'Low') {
       _shakeThreshold = 35.0;
     } else if (sensitivity == 'High') {
@@ -224,11 +232,13 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
     _shakeSubscription?.cancel();
     _shakeSubscription = accelerometerEvents.listen((event) {
       if (!_shakeEnabled) return;
-      
-      final force = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+
+      final force =
+          sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
       if (force > _shakeThreshold) {
         final now = DateTime.now();
-        if (_lastShakeTime == null || now.difference(_lastShakeTime!) > const Duration(seconds: 10)) {
+        if (_lastShakeTime == null ||
+            now.difference(_lastShakeTime!) > const Duration(seconds: 10)) {
           _lastShakeTime = now;
           HapticFeedback.vibrate();
           _sendSOS();
@@ -269,7 +279,6 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
       await _player.play(DeviceFileSource(tempFile.path));
     } catch (_) {}
   }
-
   Future<Position> _determinePosition() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) throw 'Location services disabled';
@@ -281,7 +290,8 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
         permission == LocationPermission.deniedForever) {
       throw 'Location permission denied';
     }
-    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
   }
 
   Future<List<String>> _loadPhones() async {
@@ -296,11 +306,11 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
     try {
       await Permission.location.request();
       await Permission.sms.request();
-      await _playAlertSound();
 
       final pos = await _determinePosition();
-      final mapLink = 'https://www.google.com/maps?q=${pos.latitude},${pos.longitude}';
-      
+      final mapLink =
+          'https://www.google.com/maps?q=${pos.latitude},${pos.longitude}';
+
       final prefs = await SharedPreferences.getInstance();
       final customMsg = prefs.getString('profile_custom_message') ?? '';
       final message = customMsg.isNotEmpty
@@ -386,7 +396,8 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
       appBar: AppBar(
         title: const Text(
           'SHTREE KAVACH',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 20),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 20),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -400,16 +411,13 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
             children: [
               const SizedBox(height: 10),
               _buildGPSBar(),
-
               const SizedBox(height: 40),
-
               _buildRadarSOSButton(),
-
               const SizedBox(height: 45),
-
               Row(
                 children: [
-                  const Icon(Icons.flash_on, color: Colors.cyanAccent, size: 20),
+                  const Icon(Icons.flash_on,
+                      color: Colors.cyanAccent, size: 20),
                   const SizedBox(width: 8),
                   Text(
                     "EMERGENCY QUICK PANEL",
@@ -423,7 +431,6 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
                 ],
               ),
               const SizedBox(height: 16),
-
               GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -444,7 +451,8 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
                     glowColor: Colors.amberAccent,
                     title: "Fake Call",
                     subtitle: "Excuse self to safety",
-                    onTap: () => Navigator.pushNamed(context, '/fake_call').then((_) => _initShakeDetector()),
+                    onTap: () => Navigator.pushNamed(context, '/fake_call')
+                        .then((_) => _initShakeDetector()),
                   ),
                   _buildQuickActionCard(
                     icon: Icons.local_police,
@@ -488,7 +496,10 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
               color: _gpsSignalActive ? Colors.greenAccent : Colors.amberAccent,
               boxShadow: [
                 BoxShadow(
-                  color: (_gpsSignalActive ? Colors.greenAccent : Colors.amberAccent).withOpacity(0.6),
+                  color: (_gpsSignalActive
+                          ? Colors.greenAccent
+                          : Colors.amberAccent)
+                      .withOpacity(0.6),
                   blurRadius: 6,
                   spreadRadius: 2,
                 ),
@@ -700,7 +711,8 @@ class _StrobeAlarmWidgetState extends State<_StrobeAlarmWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _isRed ? Colors.redAccent.shade700 : Colors.blue.shade900,
+      backgroundColor:
+          _isRed ? Colors.redAccent.shade700 : Colors.blue.shade900,
       body: SafeArea(
         child: Center(
           child: Column(
@@ -736,7 +748,8 @@ class _StrobeAlarmWidgetState extends State<_StrobeAlarmWidget> {
                   Navigator.pop(context);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(30),

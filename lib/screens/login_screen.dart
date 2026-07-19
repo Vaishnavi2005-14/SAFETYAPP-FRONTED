@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _loading = true);
-    
+
     final success = await ApiService.login(
       _emailCtrl.text.trim(),
       _passCtrl.text.trim(),
@@ -220,27 +220,32 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         labelText: 'Email Address',
                         labelStyle: const TextStyle(color: Colors.white60),
-                        prefixIcon: const Icon(Icons.email_outlined, color: Colors.white60),
+                        prefixIcon: const Icon(Icons.email_outlined,
+                            color: Colors.white60),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.04),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.05)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.05)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Colors.pinkAccent),
+                          borderSide:
+                              const BorderSide(color: Colors.pinkAccent),
                         ),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter your email';
                         }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value.trim())) {
                           return 'Please enter a valid email address';
                         }
                         return null;
@@ -254,27 +259,34 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         labelText: 'Password',
                         labelStyle: const TextStyle(color: Colors.white60),
-                        prefixIcon: const Icon(Icons.lock_outline, color: Colors.white60),
+                        prefixIcon: const Icon(Icons.lock_outline,
+                            color: Colors.white60),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                            _obscureText
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
                             color: Colors.white60,
                           ),
-                          onPressed: () => setState(() => _obscureText = !_obscureText),
+                          onPressed: () =>
+                              setState(() => _obscureText = !_obscureText),
                         ),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.04),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.05)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.05)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Colors.pinkAccent),
+                          borderSide:
+                              const BorderSide(color: Colors.pinkAccent),
                         ),
                       ),
                       validator: (value) {
@@ -309,7 +321,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 20),
                     _loading
                         ? const Center(
-                            child: CircularProgressIndicator(color: Colors.pinkAccent),
+                            child: CircularProgressIndicator(
+                                color: Colors.pinkAccent),
                           )
                         : ElevatedButton(
                             onPressed: _submit,
@@ -344,7 +357,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (_) => const SignupScreen()),
+                              MaterialPageRoute(
+                                  builder: (_) => const SignupScreen()),
                             );
                           },
                           child: const Text(
